@@ -19,10 +19,37 @@ def run_check(threadid, delay, port, task):
 def getmetrics(threadid, req):
 	r = requests.get(req)
 	data = r.json()
+#	print (','.join(["query-executor-"+str(threadid), datetime.datetime.now().strftime("%H:%M:%S"), str(data['beans'][7]), str(data['beans'][11]), str(data['beans'][58]), str(data['beans'][17]),str(data['beans'][67])]))
 	jmx_list=list(data.values())
+	metrics = []
+	i = 0
 	for item in itertools.chain.from_iterable(jmx_list):
 		if 'CurrentThreadCpuTime' in item:
-			print (','.join(["query-executor-"+str(threadid), datetime.datetime.now().strftime("%H:%M:%S"), str(item["CurrentThreadCpuTime"])]))
+			metrics.append("CurrentThreadCpuTime")
+			metrics.append(str(item["CurrentThreadCpuTime"]))
+		elif 'MemHeapUsedM' in item:
+			metrics.append("MemHeapUsedM")
+			metrics.append(str(item["MemHeapUsedM"]))
+		elif 'SystemCpuLoad' in item:
+			metrics.append("SystemCpuLoad")
+			metrics.append(str(item["SystemCpuLoad"]))
+			metrics.append("ProcessCpuLoad")
+			metrics.append(str(item["ProcessCpuLoad"]))
+			metrics.append("ProcessCpuTime")
+			metrics.append(str(item["ProcessCpuTime"]))
+#		elif 'CacheHitRatio' in item:
+#			metrics.append("CacheHitRatio")
+#			metrics.append(str(item["CacheHitRatio"]))
+#		elif 'tag.Context' in item and item["tag.Context"] == "s3aFileSystem":
+#			s3metrics = {key:val for key,val in filter(lambda t: isinstance(t[1], int) and t[1] > 0, item.items())}
+#			if s3metrics:
+#				metrics.append("S3 metrics")
+#				metrics.append(str(s3metrics))
+#				s3metrics = []
+		else:
+			continue
+			
+	print (','.join(["query-executor-"+str(threadid), datetime.datetime.now().strftime("%H:%M:%S"), str(metrics)]))
 
 
 COMPUTE_NAME=sys.argv[1]
